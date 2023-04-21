@@ -22,13 +22,13 @@ router.get('/',validate,roleAdminGuard,async function(req, res, next) {
   }
 });
 
-router.get('/:id',async function(req, res, next) {
-  let user = await userModel.findOne({_id:req.params.id});
-  res.send({
-    user,
-    message:'data fetched successfully'
-  });
-});
+// router.get('/:id',async function(req, res, next) {
+//   let user = await userModel.findOne({_id:req.params.id});
+//   res.send({
+//     user,
+//     message:'data fetched successfully'
+//   });
+// });
 
 router.post('/signup',async(req,res)=>{
   try{
