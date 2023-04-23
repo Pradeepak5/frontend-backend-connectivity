@@ -1,4 +1,5 @@
 var express = require('express');
+var nodemailer = require('nodemailer');
 var router = express.Router();
 const {userModel} = require('../schemas/userSchema');
 const mongoose = require('mongoose');
@@ -23,12 +24,86 @@ router.get('/',validate,roleAdminGuard,async function(req, res, next) {
 });
 
 router.get('/:id',async function(req, res, next) {
-  let user = await userModel.findOne({_id:req.params.id});
-  res.send({
-    user,
-    message:'data fetched successfully'
-  });
+  try{
+    let user = await userModel.findOne({email:req.params.id});
+    let userid = user._id.toString();
+    console.log(`http://localhost:3000/setpassword/${userid}`);
+    
+    res.send({
+      user,
+      message:'Check Your Mail ID....also spam folder'
+    });
+  }catch(err){
+    res.send({
+      message:"Internal server error",
+      err
+    })
+  }
 });
+
+router.get('/:id',async function(req, res, next) {
+  try{
+    let user = await userModel.findOne({email:req.params.id});
+    let userid = user._id.toString();
+    var transporter = nodemailer.createTransport({
+      service:'gmail',
+      auth:{
+        user:'vivasaii571@gmail.com',
+        pass:'vxbulltqqxwtgydv'
+      }
+    })
+    var mailOptions ={
+      from:'vivasaii571@gmail.com',
+      to:req.params.id,
+      subject:'Reset-Password',
+      text:`Reset Password Requested URL : https://pradeepak5-admin-auth.netlify.app/setpassword/${userid}`
+    };
+    transporter.sendMail(mailOptions,(err,info)=>{
+      if(err){
+        console.log(err);
+      }else{
+        console.log('Email sent: '+info.response);
+      }
+    })
+    res.send({
+      user,
+      message:'Check Your Mail ID....also spam folder'
+    });
+  }catch(err){
+    res.send({
+      message:"Internal server error",
+      err
+    })
+  }
+});
+
+router.put("/:id",async(req,res)=>{
+  try{
+    let user = await userModel.findOne({_id:req.params.id.toString()});
+    if(user){
+      let hashedPassword = await hashPassword(req.body.password);
+      user.password=hashedPassword;
+      await user.save();
+      res.send({
+        user,
+        message:"user updated successfully"
+      })
+    }else{
+      res.send({
+        message:"user does not exists!"
+      })
+    }
+  }
+  catch(err){
+    res.status(500).send({
+      message:'Internal server error',
+      err
+    })
+  }
+})
+
+
+
 
 router.post('/signup',async(req,res)=>{
   try{
@@ -54,7 +129,7 @@ router.post('/signup',async(req,res)=>{
   }
 })
 
-router.post('/login',async(req,res)=>{
+router.post('/login',async(req,res,next)=>{
   try{
     let user = await userModel.findOne({email:req.body.email})
     if(user){
@@ -71,7 +146,7 @@ router.post('/login',async(req,res)=>{
         })
       }else{
         res.status(402).send({
-          message:'Invalid Credential'
+          message:'Invalid Credential only admins allowed'
         })
       }
     }else{
@@ -80,7 +155,6 @@ router.post('/login',async(req,res)=>{
       })
     }
   }catch(err){
-    console.log(err);
     res.status(500).send({
       message : 'Internal server error',
       err
@@ -110,30 +184,5 @@ router.delete('/:id',async(req,res)=>{
   }
 })
 
-router.put('/:id',async(req,res)=>{
-  try{
-    let user = await userModel.findOne({_id:req.params.id});
-    if(user){
-      user.name=req.body.name;
-      user.email=req.body.email;
-      user.password=req.body.password;
-
-      await user.save();
-      res.send({
-        message:"user updated successfully"
-      })
-    }else{
-      res.send({
-        message:"user does not exists!"
-      })
-    }
-  }
-  catch(err){
-    res.status(500).send({
-      message:'Internal server error',
-      err
-    })
-  }
-})
 
 module.exports = router;
