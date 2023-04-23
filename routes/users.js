@@ -27,24 +27,7 @@ router.get('/:id',async function(req, res, next) {
   try{
     let user = await userModel.findOne({email:req.params.id});
     let userid = user._id.toString();
-    console.log(`http://localhost:3000/setpassword/${userid}`);
-    
-    res.send({
-      user,
-      message:'Check Your Mail ID....also spam folder'
-    });
-  }catch(err){
-    res.send({
-      message:"Internal server error",
-      err
-    })
-  }
-});
-
-router.get('/:id',async function(req, res, next) {
-  try{
-    let user = await userModel.findOne({email:req.params.id});
-    let userid = user._id.toString();
+    console.log(userid);
     var transporter = nodemailer.createTransport({
       service:'gmail',
       auth:{
