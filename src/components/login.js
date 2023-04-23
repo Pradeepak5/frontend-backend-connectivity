@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios'
 import {url} from '../App'
 import { toast } from 'react-toastify';
-import {useNavigate} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
 function Login() {
   let [email,setEmail] = useState("")
@@ -39,6 +39,10 @@ function Login() {
       <Form.Group className="mb-3">
         <Form.Label>Password</Form.Label>
         <Form.Control type="password" placeholder="Password" onChange={(e)=>setPassword(e.target.value)}/>
+      </Form.Group>
+
+      <Form.Group className="mb-3">
+        <Link to='/resetpassword'>forget password?</Link>
       </Form.Group>
      
       <Button variant="primary" onClick={()=>handleLogin()}>
